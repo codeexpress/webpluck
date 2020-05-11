@@ -3,7 +3,24 @@
 `webpluck` scrapes a specific values from a web page. It works as a standalone
 binary as well as in a API mode.
 
-## Inputs
+## Download
+
+### Latest Releases
+`webpluck` is available for 64 bit linux, OS X and Windows systems.
+Latest versions can be downloaded from the
+[Release](https://github.com/codeexpress/webpluck/releases) tab above. This is the preferred way.
+
+### Build from source
+This is a golang project. Assuming you have golang compiler installed,
+the following will build the binary from scratch
+```
+$ git clone https://github.com/codeexpress/webpluck
+$ cd webpluck
+$ go get
+$ go build -o webpluck main.go logger.go webpluck.go
+```
+
+## Usage
 `webpluck` takes the following input:
  - URL of the webpage
  - XPATH of the element
@@ -89,4 +106,5 @@ The result from the API is as follows. The `pluckedData` field returns the value
   "pluckedData": "Joel Spolsky and Jeff Atwood",
   "regex": "^(.*) launch .*",
   "xpath": "//*[@id=\"content\"]/section[3]/ol/li[1]/ol/li[2]/text()"
+}
 ```
