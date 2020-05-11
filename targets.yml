@@ -1,0 +1,13 @@
+targetList:
+  -   name: example.com
+      baseUrl: http://example.com/
+      xpath:   /html/body/div/p[2]/a/@href
+      regex:   ^(?:https?://)?(?:[^@\n]+@)?([^:/\n]+)
+  -   name: stackoverflow_founders
+      baseUrl: https://stackoverflow.com/company
+      xpath:  //*[@id="content"]/section[3]/ol/li[1]/ol/li[2]
+      regex: ^(.*) launch .*
+  -   name: stackoverflow_example_without_regex
+      baseUrl: https://stackoverflow.com/questions/18361750
+      xpath: //*[@id="question"]/div[2]/div[2]/div[3]/div/div[3]/div/div[1]
+      regex:
