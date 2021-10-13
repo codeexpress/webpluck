@@ -53,9 +53,7 @@ The xpath in example above comes out to be: ```//*[@id="content"]/section[3]/ol/
 ### 3. `regex` to pluck the right value
 
 Note the the xpath above leads us to the value: *Joel Spolsky and Jeff Atwood launch Stack Overflow*
-
 Since we want to trim that down further, we'll provide a regex value to extract just the names.
-
 This regex will fetch just the names (the value in parenthesis):
 ``` ^(*.) launch .* ```
 
