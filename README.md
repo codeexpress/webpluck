@@ -16,8 +16,7 @@ the following will build the binary from scratch
 ```
 $ git clone https://github.com/codeexpress/webpluck
 $ cd webpluck
-$ go get
-$ go build -o webpluck main.go logger.go webpluck.go
+$ go build -o webpluck cmd/main.go
 ```
 
 ## Usage
