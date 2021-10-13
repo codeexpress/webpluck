@@ -1,13 +1,17 @@
 targetList:
-  -   name: example.com
-      baseUrl: http://example.com/
-      xpath:   /html/body/div/p[2]/a/@href
-      regex:   ^(?:https?://)?(?:[^@\n]+@)?([^:/\n]+)
-  -   name: stackoverflow_founders
-      baseUrl: https://stackoverflow.com/company
-      xpath:  //*[@id="content"]/section[3]/ol/li[1]/ol/li[2]
-      regex: ^(.*) launch .*
-  -   name: stackoverflow_example_without_regex
+  -   name: ufl_ms_cs_fall
+      baseUrl: https://www.cise.ufl.edu/admissions/graduate/
+      xpath:  //*[@id="tablepress-14"]/tbody/tr[2]/td[2]
+      regex:
+  -   name: ufl_ms_cs_spring
+      baseUrl: https://www.cise.ufl.edu/admissions/graduate/
+      xpath:  //*[@id="tablepress-15"]/tbody/tr[1]/td[2]
+      regex:
+  -   name: ncsu_cs_ms
+      baseUrl: https://www.csc.ncsu.edu/academics/graduate/admdeadlines.php
+      xpath:  //*[@id="main"]/ol/li[1]/ul/li[1]/strong
+      regex:
+  -   name: stackoverflow_extract_asked_date_of_a_question
       baseUrl: https://stackoverflow.com/questions/18361750
       xpath: //*[@id="question"]/div[2]/div[2]/div[3]/div/div[3]/div/div[1]
       regex:

@@ -10,11 +10,9 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/codeexpress/webpluck/logger"
+	"github.com/codeexpress/webpluck/webpluck"
 	"gopkg.in/yaml.v2"
-)
-
-const (
-	UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36"
 )
 
 var (
@@ -24,9 +22,20 @@ var (
 	serverModePtr *int
 )
 
+type targetList struct {
+	TargetList []dataLocation `yaml:"targetList"`
+}
+
+type dataLocation struct {
+	Name    string `yaml:"name"`
+	BaseUrl string `yaml:"baseUrl"`
+	Xpath   string `yaml:"xpath"`
+	Regex   string `yaml:"regex"`
+}
+
 func main() {
 	initFlags()
-	initLogger()
+	logger.InitLogger()
 
 	serverMode := isFlagPassed("p")
 
@@ -42,7 +51,7 @@ Listens on a port and answers online queries of type:
 http://localhost:8080?baseUrl="example.com"&xpath="/html/body"&regex=""
 */
 func serveApi() {
-	logIt("Started HTTP server on localhost: "+strconv.Itoa(*serverModePtr), true)
+	logger.LogIt("Started HTTP server on localhost: "+strconv.Itoa(*serverModePtr), true)
 
 	http.HandleFunc("/", handleHttp)
 	fmt.Println(http.ListenAndServe(":"+strconv.Itoa(*serverModePtr), nil))
@@ -59,22 +68,22 @@ func handleHttp(w http.ResponseWriter, req *http.Request) {
 	results["xpath"] = xpath
 	results["regex"] = regex
 
-	logIt(getIp(req) + "  " + req.Header.Get("User-Agent") + " Request: ")
-	logIt(results)
+	logger.LogIt(getIp(req) + "  " + req.Header.Get("User-Agent") + " Request: ")
+	logger.LogIt(results)
 	defer func() { // in case of panic
 		if err := recover(); err != nil {
-			http.Error(w, "my own error message", http.StatusInternalServerError)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			fmt.Fprintf(w, "Webpluck encountered an error. Make sure that the baseUrl is a valid URL and xpath and regex are valid\n")
-			fmt.Fprintf(w, "Error encountered is:\n%s\n", err)
-			logIt(err)
+			fmt.Fprintf(w, "Error description:\n%s\n", err)
+			logger.LogIt(err)
 		}
 	}()
-	text := ExtractTextFromUrl(baseUrl, xpath, regex)
+	text := webpluck.ExtractTextFromUrl(baseUrl, xpath, regex)
 	results["pluckedData"] = text
 	jsonString, err := json.MarshalIndent(results, "", "  ")
 	check(err)
 	fmt.Fprintf(w, string(jsonString))
-	logIt("Answer: " + text)
+	logger.LogIt("Answer: " + text)
 }
 
 func pluckFromFile() {
@@ -88,15 +97,15 @@ func pluckFromFile() {
 	results := make(map[string]string)
 
 	for _, t := range list.TargetList {
-		text := ExtractTextFromUrl(t.BaseUrl, t.Xpath, t.Regex)
+		text := webpluck.ExtractTextFromUrl(t.BaseUrl, t.Xpath, t.Regex)
 		results[t.Name] = text
 		if *outputTextPtr { // if output to text (t) flag is set
 			fmt.Println(t.Name + ": " + text)
 		}
 	}
 
-	logIt("Webpluck invoked. Reading from file: " + *filePtr)
-	logIt(results)
+	logger.LogIt("Webpluck invoked. Reading from file: " + *filePtr)
+	logger.LogIt(results)
 
 	if !*outputTextPtr { // default case is to print in JSON
 		jsonString, err := json.MarshalIndent(results, "", "  ")
@@ -143,12 +152,12 @@ func check(e error) {
 // Get IP address of the incoming HTTP request based on forwarded-for
 // header (present in case of proxy). If not, use the remote address
 func getIp(req *http.Request) string {
-	forwarded := req.Header.Get("X-FORWARDED-FOR")
-	var addr string
-	if forwarded != "" {
-		addr = forwarded
+	forwardedIp := req.Header.Get("X-Forwarded-For")
+	if forwardedIp != "" {
+		return forwardedIp
 	}
-	addr = req.RemoteAddr
+
+	addr := req.RemoteAddr
 	ip, _, _ := net.SplitHostPort(addr)
 	return ip
 }

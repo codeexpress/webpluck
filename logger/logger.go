@@ -1,4 +1,4 @@
-package main
+package logger
 
 import (
 	"encoding/json"
@@ -14,7 +14,7 @@ var (
 )
 
 // Initializing the logger and customizing prefix
-func initLogger() {
+func InitLogger() {
 	f, err := os.OpenFile("run.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		panic(err)
@@ -26,7 +26,7 @@ func initLogger() {
 // Logs to log file
 // takes generic object and then based on the type of object,
 // logs is in appropriate style.
-func logIt(val interface{}, console ...bool) {
+func LogIt(val interface{}, console ...bool) {
 	// if console is passed, print to stdout as well
 	if len(console) != 0 {
 		fmt.Println(val)

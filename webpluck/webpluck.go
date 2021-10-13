@@ -1,4 +1,4 @@
-package main
+package webpluck
 
 import (
 	"io/ioutil"
@@ -6,19 +6,13 @@ import (
 	"regexp"
 	"strings"
 
-	"gopkg.in/xmlpath.v2"
+	"github.com/antchfx/htmlquery"
+	"golang.org/x/net/html"
 )
 
-type targetList struct {
-	TargetList []dataLocation `yaml:"targetList"`
-}
-
-type dataLocation struct {
-	Name    string `yaml:"name"`
-	BaseUrl string `yaml:"baseUrl"`
-	Xpath   string `yaml:"xpath"`
-	Regex   string `yaml:"regex"`
-}
+const (
+	UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36"
+)
 
 /* Params:
    url   - URL of the page to be scraped
@@ -35,23 +29,24 @@ func ExtractTextFromUrl(
 	text := ""
 
 	//logIt("Fetch from URL: "+url, 1)
-	parsedHtml := fetchUrl(url) // returns a xmlpath.Node object
-	path := xmlpath.MustCompile(xpath)
-	value, ok := path.String(parsedHtml)
-	if ok {
-		if regex != "" {
-			// try applying regex
-			regexMatch := regexp.MustCompile(regex)
-			text = regexMatch.FindStringSubmatch(string(value))[1]
-		} else {
-			text = value // no regex, the xpath element is the value
-		}
+	parsedHtml := fetchUrl(url) // returns a xmlquery.Node object
+
+	node := htmlquery.FindOne(parsedHtml, xpath)
+	value := htmlquery.InnerText(node)
+
+	if regex != "" {
+		// try applying regex
+		regexMatch := regexp.MustCompile(regex)
+		text = regexMatch.FindStringSubmatch(string(value))[1]
+	} else {
+		text = value // no regex, the xpath element is the value
 	}
+
 	return strings.TrimSpace(text)
 }
 
 // does a HTTP GET and returns the HTML body for that URL
-func fetchUrl(url string) *xmlpath.Node {
+func fetchUrl(url string) *html.Node {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -66,8 +61,7 @@ func fetchUrl(url string) *xmlpath.Node {
 
 	html, _ := ioutil.ReadAll(resp.Body)
 	htmlStr := string(html)
-
-	parsedHtml, err := xmlpath.ParseHTML(strings.NewReader(htmlStr))
+	parsedHtml, err := htmlquery.Parse(strings.NewReader(htmlStr))
 	if err != nil {
 		panic(err)
 	}
